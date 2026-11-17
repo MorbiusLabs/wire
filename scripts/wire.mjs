@@ -10,7 +10,6 @@ const SOURCES = [
   { id: "boe", name: "Bank of England", kind: "Central bank", url: "https://www.bankofengland.co.uk/rss/news" },
   { id: "bis", name: "BIS central bankers' speeches", kind: "Central bank", url: "https://www.bis.org/doclist/cbspeeches.rss" },
   { id: "sec", name: "SEC", kind: "Regulator", url: "https://www.sec.gov/news/pressreleases.rss" },
-  { id: "cftc", name: "CFTC", kind: "Regulator", url: "https://www.cftc.gov/RSS/RSSGP/rssgp.xml" },
   { id: "openai", name: "OpenAI", kind: "AI lab", url: "https://openai.com/news/rss.xml", filter: true },
 ];
 // AI x money keywords. Regulators: flag items about AI or crypto. AI labs: keep only items about money.
