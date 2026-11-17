@@ -1,0 +1,49 @@
+name: wire
+
+# Every 15 minutes: pull primary-source feeds and daily market series into the `data` branch.
+# The data branch is kept to a single commit. morbiuslabs.org reads both files from raw.githubusercontent.com.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wire
+  cancel-in-progress: false
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Load current data
+        run: |
+          mkdir -p out
+          for f in wire.json markets.json; do
+            curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/data/$f?t=$(date +%s)" -o "prev-$f" || echo "no previous $f"
+          done
+
+      - name: Pull feeds and markets
+        run: |
+          node scripts/wire.mjs prev-wire.json > out/wire.json
+          node scripts/markets.mjs prev-markets.json > out/markets.json
+
+      - name: Publish to data branch
+        run: |
+          cd out
+          git init -q -b data
+          git config user.name "morbius wire bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wire.json markets.json
+          git commit -q -m "wire $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" data
